@@ -1,5 +1,11 @@
-# Main ossec server config
+# Main ossec server class
+
+#### Anchor common.pp before ::ossec::server::install.pp
+
 class ossec::server (
+  $package_ensure                      = $ossec::params::server_package_ensure,
+  $hidsserverpackage                   = $ossec::params::hidsserverpackage,
+  $hidsserverservice                   = $ossec::params::hidsserverservice,
   $mailserver_ip,
   $ossec_emailto,
   $ossec_emailfrom                     = "ossec@${::domain}",
@@ -7,74 +13,31 @@ class ossec::server (
   $ossec_global_host_information_level = 8,
   $ossec_global_stat_level             = 8,
   $ossec_email_alert_level             = 7,
-  $ossec_ignorepaths                   = []
-) {
-  include ossec::common
-
-  # install package
-  case $::osfamily {
-    'Debian' : {
-      package { $ossec::common::hidsserverpackage:
-        ensure  => installed,
-        require => Apt::Ppa['ppa:nicolas-zin/ossec-ubuntu'],
-      }
-    }
-    'RedHat' : {
-      package { 'mysql': ensure => present }
-      package { 'ossec-hids':
-        ensure   => installed,
-      }
-      package { $ossec::common::hidsserverpackage:
-        ensure  => installed,
-        require => Package['mysql'],
-      }
-    }
-    default: { fail('OS family not supported') }
-
+  $ossec_ignorepaths                   = [],
+  $restart                             = $ossec::params::restart,
+  $service_ensure                      = $ossec::params::service_ensure
+) inherits ossec::params {
+  
+  include '::ossec::server::install'
+  include '::ossec::server::config'
+  include '::ossec::server::key'
+  include '::ossec::server::service'
+  
+  if $restart {
+    Anchor['ossec::server::start'] ->
+    Class['ossec::server::install'] ->
+    # Only difference between the blocks is that we use ~> to restart if
+    # restart is set to true.
+    Class['ossec::server::config'] ->
+    Class['ossec::server::key'] ~>
+    Class['ossec::server::service'] ->
+    Anchor['ossec::server::end']
+  } else {
+    Anchor['ossec::server::start'] ->
+    Class['ossec::server::install'] ->
+    Class['ossec::server::config'] ->
+    Class['ossec::server::key'] ->
+    Class['ossec::server::service'] ->
+    Anchor['ossec::server::end']
   }
-
-  service { $ossec::common::hidsserverservice:
-    ensure    => running,
-    enable    => true,
-    hasstatus => true,
-    pattern   => $ossec::common::hidsserverservice,
-    require   => Package[$ossec::common::hidsserverpackage],
-  }
-
-  # configure ossec
-  concat { '/var/ossec/etc/ossec.conf':
-    owner   => 'root',
-    group   => 'ossec',
-    mode    => '0440',
-    require => Package[$ossec::common::hidsserverpackage],
-    notify  => Service[$ossec::common::hidsserverservice]
-  }
-  concat::fragment { 'ossec.conf_10' :
-    target  => '/var/ossec/etc/ossec.conf',
-    content => template('ossec/10_ossec.conf.erb'),
-    order   => 10,
-    notify  => Service[$ossec::common::hidsserverservice]
-  }
-  concat::fragment { 'ossec.conf_90' :
-    target  => '/var/ossec/etc/ossec.conf',
-    content => template('ossec/90_ossec.conf.erb'),
-    order   => 90,
-    notify  => Service[$ossec::common::hidsserverservice]
-  }
-
-  concat { '/var/ossec/etc/client.keys':
-    owner   => 'root',
-    group   => 'ossec',
-    mode    => '0640',
-    notify  => Service[$ossec::common::hidsserverservice],
-    require => Package[$ossec::common::hidsserverpackage],
-  }
-  concat::fragment { 'var_ossec_etc_client.keys_end' :
-    target  => '/var/ossec/etc/client.keys',
-    order   => 99,
-    content => "\n",
-    notify  => Service[$ossec::common::hidsserverservice]
-  }
-  Ossec::Agentkey<<| |>>
-
 }
