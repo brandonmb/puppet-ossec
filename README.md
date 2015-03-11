@@ -13,13 +13,16 @@
 ## Overview
 
 This module installs and configures OSSEC-HIDS client and server.
-It requires `puppetlabs/concat`.
+It requires `puppetlabs/concat`, `puppetlabs/stdlib`, `andyshinn/atomic`, `saz/rsyslog`, `puppetlabs/apt`, and `nanliu/staging`.
 
 ## Module Description
 
 This module can be used to install and configure the ossec agent or server.
 
 The agent/client is configured by installing the `ossec::client` class.
+
+Alienvault's ossec repo is the default repo ossec is being installed from. 
+This can be overwritten with a custom ppa, apt source, or by installing ossec completely from source.
 
 The server is configured by installing the `ossec::server` class, and using optionally
 
@@ -56,8 +59,16 @@ ossec::addlog { 'mysql_slow':
   logfile => '/var/log/mysql/log-slow-queries.log',
   logtype => 'mysql_log'
 }
+
+class {
+  'ossec':
+    install_from_source => true,
+    user_install_type   => server;
+  'ossec::server':
+    mailserver_ip=>"mailserver.mycompany.com",
+    ossec_emailto=>"nicolas.zin@mycompany.com",
+}
 ```
-You can find more out about ossec log types @ http://ossec-docs.readthedocs.org/en/latest/syntax/head_ossec_config.localfile.html
 
 ### CLIENT
 ```puppet
@@ -100,6 +111,52 @@ class {
 * `ossec::client::service`: Manages ossec agent service.
 
 ### Parameters
+
+####ossec
+
+These parameters are only useful if you need to change the seed for the agent key
+or if you need to change where ossec is installed from.
+
+#####`$agent_seed`
+
+Part of the generated agent key
+
+#####`$comment`, `$custom_apt_source`, `$include_src`, `$key`, `$key_server`, `$location`, `$pin`, `$required_packages`, `$release`, `$repos`
+
+The above variables are all used for defining a custom apt source.
+When defining a custom apt source make sure to set `$location`
+
+#####`$custom_apt_ppa`
+
+You can define a custom ppa to use.
+```puppet
+custom_apt_ppa => 'ppa:nicolas-zin/ossec-ubuntu'
+```
+
+#####`$install_from_source`
+
+This allows ossec to be installed from source.
+
+#####`$make_package`
+
+The package(s) you distro needs to be able to use make.
+
+#####`$source_url`, `$target` - Please overwrite defaults with care, and only if needed!!!
+
+Define a source for ossec and then where the extracted files will be staged.
+
+#####`$ossec_version`, `$ossec_extension`
+
+The ossec version and extension of the source file. Ossec version needs to match package version from source URL.
+
+#####`$user_language`, `$user_no_stop`, `$user_install_type`, `$user_dir`, `$user_enable_ar`, `$user_enable_syscheck`
+#####`$user_enable_rootcheck`, `$user_update_rules`, `$user_agent_server`
+
+The above variables are used to configure the source installation. Some of these are overwritten by other parts of the module.
+When installing the server from source, you will want to overwrite `$user_install_type` to "server"
+user_update_rules tells ossec that if it's updating to also update the rules.
+
+See http://ossec-docs.readthedocs.org/en/latest/manual/installation/install-source-unattended.html for more information.
 
 ####ossec::server
  
@@ -247,6 +304,8 @@ Log file to monitor
 #####`$logtype`
 
 Type of log file.
+
+You can find more out about ossec log types @ http://ossec-docs.readthedocs.org/en/latest/syntax/head_ossec_config.localfile.html
 
 ####ossec::client
 
