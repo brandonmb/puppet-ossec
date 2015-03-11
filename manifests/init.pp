@@ -1,25 +1,51 @@
-# Ossec class
+# == Class: ossec
 #
-## Variables
-# comment - set a comment for custom_apt_source
-# custom_apt_ppa - set this to an actual string
+# This is the base ossec module. To actually do anything with ossec you'll need to 
+# also specify the ossec::client or ossec::server classes 
+#
+# === Parameters
+#
+# agent_seed - optional - creates seed for agentkey file
+# comment - optional - set a comment for custom_apt_source
+# custom_apt_ppa - optional - set this to an actual string
 #    ex. 'ppa:nicolas-zin/ossec-ubuntu'
-# custom_apt_source - this is a boolean, set to true or leave default
-# include_src - include source for custom_apt_source
-# install_from_source - boolean, set to true or false
-# key - key for custom_apt_source
-# key_server - key server for custom_apt_source
-# location - http location for custom_apt_source repo
-# name - just sets the name for staging target directory
-# pin - ping for custom_apt_source
-# release - the relase of custom_apt_source
-# repos - repos for custom_apt_source
-# required_packages - packages required for custom_apt_source
-# source_url - source to pull ossec source files from
+# custom_apt_source - optional - this is a boolean, set to true or leave default
+# include_src - optional - include source for custom_apt_source
+# install_from_source - optional - boolean, set to true or false
+# key - optional - key for custom_apt_source
+# key_server - optional - key server for custom_apt_source
+# location - optional - http location for custom_apt_source repo
+# pin - optional - pin for custom_apt_source
+# release - optional - the relase of custom_apt_source
+# repos - optional - repos for custom_apt_source
+# required_packages - optional - packages required for custom_apt_source
+####
+# The following parameters are only used when building from source
+# source_url - optional - source to pull ossec source files from
 #    (see staging module for source options)
-# target - target directory for extracted files
+# ossec_version - optional - set the ossec version for building from source only
+# ossec_extension - optional - extension of source file (has only been test with tar.gz)
+# target - optional - target directory for extracted files
+# make_package - optional - package(s) a distribution needs to run make for building source
+# user_language, user_no_stop, user_install_type, user_dir, user_enable_ar,
+# user_enable_syscheck, user_enable_rootcheck, user_update_rules, user_agent_server
+# **user_install_type - optional - this needs to be changed to server if you are installing ossec
+#    from source on an ossec server, otherwise it will build the installation as a client.
+####
+#
+# === Examples
+#
+#  class {
+#    'ossec':
+#      install_from_source   => true,
+#      source_url            => '/home/local/ossec-hids-2.8.1.tar.gz';
+#    'ossec::client':
+#      hidsagentservice      => 'ossec',
+#      ossec_server_ip       => '127.0.0.1',
+#      ossec_active_response => false;
 
 class ossec (
+  $agent_seed          = 'xaeS7ahf',
   $comment             = undef,
   $custom_apt_ppa      = undef,
   $custom_apt_source   = undef,

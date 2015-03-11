@@ -3,7 +3,7 @@ define ossec::agentkey(
   $agent_id,
   $agent_name,
   $agent_ip_address,
-  $agent_seed = 'xaeS7ahf',
+  $agent_seed = $ossec::agent_seed,
 ) {
   if ! $agent_id { fail("ossec::agentkey: $agent_id is missing")}
 

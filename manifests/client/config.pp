@@ -2,7 +2,10 @@
 
 class ossec::client::config(
   $ossec_active_response = $ossec::client::ossec_active_response,
-  $ossec_server_ip       = $ossec::client::ossec_server_ip
+  $ossec_server_ip       = $ossec::client::ossec_server_ip,
+  $ossec_checkpaths      = $ossec::client::ossec_checkpaths,
+  $ossec_ignorepaths     = $ossec::client::ossec_ignorepaths,
+  $syscheck_frequency    = $ossec::client::syscheck_frequency
 ) {
   concat { '/var/ossec/etc/ossec.conf':
     owner   => 'root',

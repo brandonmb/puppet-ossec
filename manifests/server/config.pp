@@ -1,8 +1,19 @@
 # This class configures the the ossec client 
 
-#### This class needs anchored after install and common
-
-class ossec::server::config {
+class ossec::server::config(
+  $mailserver_ip                = $ossec::server::mailserver_ip,
+  $ossec_emailto                = $ossec::server::ossec_emailto,
+  $ossec_emailfrom              = $ossec::server::ossec_emailfrom,
+  $ossec_active_response        = $ossec::server::ossec_active_response,
+  $ossec_global_host_info_level = $ossec::server::ossec_global_host_info_level,
+  $ossec_global_stat_level      = $ossec::server::ossec_global_stat_level,
+  $ossec_email_alert_level      = $ossec::server::ossec_email_alert_level,
+  $ossec_newrules               = $ossec::server::ossec_newrules,
+  $ossec_checkpaths             = $ossec::server::ossec_checkpaths,
+  $ossec_ignorepaths            = $ossec::server::ossec_ignorepaths,
+  $syscheck_frequency           = $ossec::server::syscheck_frequency,
+  $new_global                   = $ossec::server::new_global
+) {
   # configure ossec
   concat { '/var/ossec/etc/ossec.conf':
     owner   => 'root',
