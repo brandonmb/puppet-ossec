@@ -1,6 +1,10 @@
-# Main ossec server class
-
-#### Anchor common.pp before ::ossec::server::install.pp
+# == Class: ossec::server
+#
+# This class sets up the ossec server
+#  - It installs from source or repo
+#  - sets up configs
+#  - verifies service is enabled and running
+#
 
 class ossec::server (
   $package_ensure                      = $ossec::params::server_package_ensure,
@@ -22,6 +26,9 @@ class ossec::server (
   include '::ossec::server::config'
   include '::ossec::server::key'
   include '::ossec::server::service'
+
+  anchor { 'ossec::server::start': }
+  anchor { 'ossec::server::end': }
   
   if $restart {
     Anchor['ossec::server::start'] ->

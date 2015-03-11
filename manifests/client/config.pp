@@ -2,7 +2,7 @@
 
 class ossec::client::config(
   $ossec_active_response = $ossec::client::ossec_active_response,
-  $ossec_server_ip       = $ossec::client::ossec_active_response
+  $ossec_server_ip       = $ossec::client::ossec_server_ip
 ) {
   concat { '/var/ossec/etc/ossec.conf':
     owner   => 'root',

@@ -28,15 +28,28 @@ class ossec (
   $key                 = undef,
   $key_server          = undef,
   $location            = undef,
-  $name                = $ossec::params::name,
+  $make_package        = $ossec::params::make_package,
   $pin                 = undef,
   $release             = undef,
   $repos               = undef,
   $required_packages   = undef,
   $source_url          = $ossec::params::source_url,
-  $target              = $ossec::params::target
-) { 
-  
+  $ossec_version       = 'ossec-hids-2.8.1',
+  $ossec_extension     = 'tar.gz',
+  $target              = "/opt/staging/${name}",
+  $user_language         = $ossec::params::user_language,
+  $user_no_stop          = $ossec::params::user_no_stop,
+  $user_install_type     = $ossec::params::user_install_type,
+  $user_dir              = $ossec::params::user_dir,
+  $user_enable_ar        = $ossec::params::user_enable_ar,
+  $user_enable_syscheck  = $ossec::params::user_enable_syscheck,
+  $user_enable_rootcheck = $ossec::params::user_enable_rootcheck,
+  $user_update_rules     = $ossec::params::user_update_rules,
+  $user_agent_server     = $ossec::params::user_agent_server
+) inherits ossec::params { 
+
+  $staging_name        = "${ossec_version}.${ossec_extension}"
+
   if $install_from_source {
     validate_bool($install_from_source)
   }
@@ -61,7 +74,8 @@ class ossec (
   }
   
   if $install_from_source {
-    ossec::source { $name:
+    package { "${make_package}": ensure => 'installed'; }
+    ossec::source { "${staging_name}":
       source_url  => $source_url,
       target      => $target,
     }    

@@ -14,6 +14,9 @@ class ossec::client(
   include '::ossec::client::config'
   include '::ossec::client::key'
   include '::ossec::client::service'
+
+  anchor { 'ossec::client::start': }
+  anchor { 'ossec::client::end': }
   
   if $restart {
     Anchor['ossec::client::start'] ->
