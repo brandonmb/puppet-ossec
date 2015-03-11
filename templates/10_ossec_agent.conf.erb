@@ -5,11 +5,13 @@
 
   <syscheck>
     <!-- Frequency that syscheck is executed - default to every 22 hours -->
-    <frequency>79200</frequency>
+    <frequency><%= @syscheck_frequency %></frequency>
     
     <!-- Directories to check  (perform all possible verifications) -->
     <directories check_all="yes">/etc,/usr/bin,/usr/sbin</directories>
     <directories check_all="yes">/bin,/sbin</directories>
+<% @ossec_checkpaths.each do |checkpath| -%>	<directories check_all="yes"><%= @checkpath %></directories>
+<% end %>
 
     <!-- Files/directories to ignore -->
     <ignore>/etc/mtab</ignore>
@@ -40,6 +42,8 @@
     <ignore>C:\WINDOWS/system32/config</ignore>
     <ignore>C:\WINDOWS/system32/spool</ignore>
     <ignore>C:\WINDOWS/system32/CatRoot</ignore>
+<% @ossec_ignorepaths.each do |path| -%>	<ignore><%= @path %></ignore>
+<% end %>
   </syscheck>
 
   <rootcheck>
@@ -101,4 +105,4 @@
   <localfile> 
     <log_format>syslog</log_format> 
     <location>/var/ossec/logs/active-responses.log</location> 
-  </localfile> 
+  </localfile>

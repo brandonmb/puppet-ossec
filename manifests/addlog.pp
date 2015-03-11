@@ -7,7 +7,7 @@ define ossec::addlog(
     target  => '/var/ossec/etc/ossec.conf',
     content => template('ossec/20_ossecLogfile.conf.erb'),
     order   => 10,
-    notify  => Service[$ossec::common::hidsserverservice]
+    notify  => Service[$ossec::server::hidsserverservice]
   }
 
 }

@@ -4,7 +4,7 @@ class ossec::lightclient {
     target  => '/var/ossec/etc/ossec.conf',
     content => template('ossec/50_ossec.conf.erb'),
     order   => 50,
-    notify  => Service[$ossec::common::hidsserverservice]
+    notify  => Service[$ossec::server::hidsserverservice]
   }
 
   include rsyslog::client
